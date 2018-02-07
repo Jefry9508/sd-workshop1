@@ -1,0 +1,28 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.ssh.insert_key = false
+  config.vm.define :centos_server do |server|
+    server.vm.box = "centos1706_v0.2.0"
+    server.vm.network :private_network, ip: "192.168.33.10"
+    server.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024","--cpus", "1", "--name", "centos_webserver" ]
+    end
+#    server.vm.provision "shell", inline: <<-SHELL
+#      sudo yum install -y httpd
+#      mkdir -p /tmp/webpage
+#      cp /vagarant/index.html /tmp/webpage
+#      cd /tmp/webpage
+#      curl www.icesi.edu.co
+#      python -m SimpleHTTPServer 8000 &
+#    SHELL
+     config.vm.provision :chef_solo do |chef|
+       chef.install = false
+       chef.cookbooks_path = "cookbooks"
+       chef.add_recipe "httpd"
+     end 
+  end
+end
